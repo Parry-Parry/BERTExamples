@@ -6,7 +6,7 @@ import ir_datasets as irds
 from pyterrier_dr import HgfBiEncoder, NumpyIndex
 from fire import Fire
 
-def embed_queries(dataset : str, out_path : str, subset : int = 0, model : str = "bert-base-uncased", batch_size : int = 256, lookup="msmarco-passage/train/triples-small", cutoff : int = 10):
+def embed_queries(dataset : str, out_path : str, model : str = "bert-base-uncased", batch_size : int = 256, lookup="msmarco-passage/train/triples-small", cutoff : int = 10):
     index = NumpyIndex(out_path)
     docpair_lookup = pd.DataFrame(irds.load(lookup).docpairs_iter()).drop_duplicates("query_id").set_index("query_id").doc_id_a.to_dict()
     queries = pd.DataFrame(irds.load(dataset).queries_iter()).rename(columns={"query_id":"qid", "text" : "query"})
