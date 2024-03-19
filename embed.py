@@ -5,6 +5,7 @@ import pandas as pd
 import ir_datasets as irds
 from pyterrier_dr import HgfBiEncoder, NumpyIndex
 from fire import Fire
+from tqdm import tqdm
 
 def embed_queries(out_path : str, subset : int = 0, model : str = "bert-base-uncased", batch_size : int = 256, dataset : str = "msmarco-passage/train/triples-small"):
     index = NumpyIndex(out_path)
@@ -20,7 +21,7 @@ def embed_queries(out_path : str, subset : int = 0, model : str = "bert-base-unc
 
     pipe = hgf >> index
 
-    iterator = (row.to_dict() for index, row in frame.iterrows())
+    iterator = tqdm((row.to_dict() for index, row in frame.iterrows()), total=len(frame))
 
     pipe.index(iterator)
     return "Done!"
