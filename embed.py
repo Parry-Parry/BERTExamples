@@ -12,6 +12,7 @@ def embed_queries(out_path : str, subset : int = 0, model : str = "bert-base-unc
     queries = pd.DataFrame(irds.load(dataset).queries_iter()).rename(columns={"query_id":"docno"}).set_index("docno").text.to_dict()
     texts = [queries[qid] for qid in idx]
     frame = pd.DataFrame({"docno": idx, "text" : texts})
+    print(frame.head())
 
     if subset > 0:
         frame = frame.sample(n=subset)
