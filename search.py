@@ -17,9 +17,12 @@ def embed_queries(dataset : str, out_path : str, subset : int = 0, model : str =
     hgf = HgfBiEncoder(model, tokenizer, batch_size=batch_size)
 
     pipe = hgf >> index % cutoff
-    res = pipe.transform(queries).rename(columns={"qid":"query_id"})
-    res['doc_id_a'] = res.docno.apply(lambda x : docpair_lookup[x])
-    res[['query_id', 'doc_id_a']].to_json(out_path + ".jsonl", orient="records", lines=True)
+    res = pipe.transform(queries).rename(columns={"qid":"query_id", "docno" : "rel_query_id"})[['query_id', 'rel_query_id']]
+    res['rel_doc_id_a'] = res.rel_query_id.apply(lambda x : docpair_lookup[x])
+
+    # group by query_id and make a list of rel_query_id, doc_id_a tuples
+    out = res.groupby('query_id').apply(lambda x: list(zip(x['rel_query_id'], x['rel_doc_id_a']))).reset_index(name='rels')
+    out.to_json(out_path + ".jsonl", orient="records", lines=True)
     return "Done!"
 
 if __name__ == "__main__":
