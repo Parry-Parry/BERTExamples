@@ -7,6 +7,9 @@ import ir_datasets as irds
 import pandas as pd
 from ..modelling.prp import PRP
 from ..examples import ExampleStore
+import random
+import numpy as np
+import torch
 
 def run(topics_or_res : str, 
          run_dir : str, 
@@ -20,7 +23,15 @@ def run(topics_or_res : str,
          k_shot_file : str = None,
          eval : str = 'msmarco-passage/trec-dl-2019/judged',
          dataset : str = 'irds:msmarco-passage/train/triples-small',
+         seed : int = 42,
          ):  
+    
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
     
     lookup = irds.load(eval)
     queries = pd.DataFrame(lookup.queries_iter()).set_index('query_id').text.to_dict()
