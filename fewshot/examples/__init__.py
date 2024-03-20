@@ -12,12 +12,21 @@ class ExampleStore(object):
 
         if file is not None: 
             lookup = json.load(open(file, 'r'))
-
-            
-
+            frame = []
+            for qid, group in lookup.items():
+                for item in group:
+                    frame.append((
+                        {   
+                            'query_id' : qid,
+                            'rel_query_id' : item['rel_query_id'],
+                            'rel_doc_id_a' : item['rel_doc_id_a'],
+                            'rel_doc_id_b' : item['rel_doc_id_b']
+                        })
+                    )
+            lookup = pd.DataFrame.from_records(frame)
             lookup['rel_query'] = lookup['rel_query_id'].apply(lambda x : queries[x])
-            lookup['pos_doc'] = lookup['doc_id_a'].apply(lambda x : docs[x])
-            lookup['neg_doc'] = lookup['doc_id_b'].apply(lambda x : docs[x])
+            lookup['pos_doc'] = lookup['rel_doc_id_a'].apply(lambda x : docs[x])
+            lookup['neg_doc'] = lookup['rel_doc_id_b'].apply(lambda x : docs[x])
             self.lookup = lookup
             self.lookup_func = self._local
         else:
