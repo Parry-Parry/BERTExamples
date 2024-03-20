@@ -5,6 +5,7 @@ import pandas as pd
 import ir_datasets as irds
 from pyterrier_dr import HgfBiEncoder, NumpyIndex
 from fire import Fire
+import json
 
 def search_queries(dataset : str, index_path : str, out_path : str, model : str = "bert-base-uncased", batch_size : int = 256, lookup="msmarco-passage/train/triples-small", cutoff : int = 10):
     index = NumpyIndex(index_path)
@@ -18,8 +19,18 @@ def search_queries(dataset : str, index_path : str, out_path : str, model : str 
     res['rel_doc_id_a'] = res.rel_query_id.apply(lambda x : docpair_lookup[x])
 
     # group by query_id and make a list of rel_query_id, doc_id_a tuples
-    out = res.groupby('query_id').apply(lambda x: list(zip(x['rel_query_id'], x['rel_doc_id_a']))).reset_index(name='rels')
-    out.to_json(out_path + ".jsonl", orient="records", lines=True)
+
+    out_dict = []
+
+    for qid, results in res.groupby('query_id'):
+        out_dict.append({
+            'query_id': qid,
+            'examples': [(rel_query_id, rel_doc_id_a) for rel_query_id, rel_doc_id_a in zip(results['rel_query_id'].to_list(), results['rel_doc_id_a'].to_list())]
+        })
+
+    with open(out_path, 'w') as f:
+        json.dump(out_dict, f)
+        
     return "Done!"
 
 if __name__ == "__main__":
