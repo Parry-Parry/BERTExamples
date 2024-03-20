@@ -4,7 +4,7 @@ if not pt.started():
 import pandas as pd
 import torch 
 from tqdm import tqdm
-from transformers import AutoModelForCaus_allM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from typing import Optional
 import numpy as np
 from more_itertools import chunked
@@ -31,7 +31,7 @@ class PRP(pt.transformer):
                  n_pass : int = 3):
         
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = AutoModelForCaus_allM.from_pretrained(model_name_or_path).to(device)
+        self.model = AutoModelForCausalLM.from_pretrained(model_name_or_path).to(device)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
 
         self.max_len = self.tokenizer.model_max_length
