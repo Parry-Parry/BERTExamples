@@ -15,6 +15,7 @@ class ExampleStore(object):
             lookup['pos_doc'] = lookup['doc_id_a'].apply(lambda x : docs[x])
             lookup['neg_doc'] = lookup['doc_id_b'].apply(lambda x : docs[x])
             self.lookup = lookup
+            self.lookup_func = self._local
         else:
             ds = irds.load(ir_dataset)
             data = pd.DataFrame(ds.docpairs_iter())
@@ -24,8 +25,9 @@ class ExampleStore(object):
             data['pos_doc'] = data['doc_id_a'].apply(lambda x : docs[x])
             data['neg_doc'] = data['doc_id_b'].apply(lambda x : docs[x])
             self.lookup = data 
+            self.lookup_func = self._random
 
-    def _random(self, n : int):
+    def _random(self, n : int, qid : Optional[str] = None):
         return [(row.query, row.pos_doc, row.neg_doc) for row in self.lookup.sample(n).itertuples()]
 
     def _local(self, n : int, qid : str):
@@ -33,4 +35,4 @@ class ExampleStore(object):
         return [(row.query, row.pos_doc, row.neg_doc) for row in _subset.itertuples()]
     
     def __call__(self, n : int, qid : Optional[str] = None) -> Any:
-        return self._random(n) if qid is None else self._local(n, qid)
+        return self.lookup_func(n, qid)

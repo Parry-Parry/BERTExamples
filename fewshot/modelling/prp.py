@@ -23,10 +23,11 @@ class PRP(pt.transformer):
     def __init__(self, 
                  model_name_or_path : str, 
                  batch_size : int = 4,
-                 mode : str = 'all',
                  few_shot_mode : str = 'random',
+                 few_shot_examples : Optional[list] = None,
                  k : int = 1,
-                 window_size : int = 10,
+                 n : int = 10,
+                 window_size : int = None,
                  n_pass : int = 3):
         
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -35,8 +36,9 @@ class PRP(pt.transformer):
 
         self.max_len = self.tokenizer.model_max_length
         self.batch_size = batch_size
-        self.score_func = self._all if mode == 'all' else self._sliding_window
+        self.score_func = self._all if window_size is None else self._sliding_window
         self.few_shot_func = self._random if few_shot_mode == 'random' else self._topk
+        self.few_shot_examples = few_shot_examples
         self.k = k
         self.window_size = window_size
         self.n_pass = n_pass
@@ -44,19 +46,15 @@ class PRP(pt.transformer):
         self.A = self.tokenizer.encode("1", return_tensors="pt", add_special_tokens=False)[0][1] # remove or add [1] based on different tokens
         self.B = self.tokenizer.encode("2", return_tensors="pt", add_special_tokens=False)[0][1] # remove or add [1] based on different tokens
     
-    def _random(self, few_shot_examples : Optional[list] = None):
-        if few_shot_examples is None:
-            return None
-        else:
-            return random.sample(few_shot_examples, self.k)
+    def _random(self, qid : str):
+        if self.few_shot_examples is None: return None
+        else: return random.sample(self.few_shot_examples(self.n, qid), self.k)
     
-    def _topk(self, few_shot_examples : Optional[list] = None):
-        if few_shot_examples is None:
-            return None
-        else:
-            return few_shot_examples[:self.k]
+    def _topk(self, qid : str):
+        if self.few_shot_examples is None: return None
+        else: return self.few_shot_examples(self.n, qid)[:self.k]
 
-    def _all(self, qid : str, query : str, query_results : pd.DataFrame, few_shot_examples : Optional[list] = None):
+    def _all(self, qid : str, query : str, query_results : pd.DataFrame):
         doc_texts = query_results['text'].tolist()
         doc_ids = query_results['docid'].tolist()
         score_matrix = np.zeros((len(doc_texts), len(doc_texts)))
@@ -64,7 +62,7 @@ class PRP(pt.transformer):
         pair_idx = create_pairs(len(doc_texts))
 
         for batch in tqdm(chunked(pair_idx, self.batch_size), unit='batch'):
-            prompts = [create_prompt(query, doc_texts[i], doc_texts[j], few_shot_examples) for i, j in batch]
+            prompts = [create_prompt(query, doc_texts[i], doc_texts[j], self.few_shot_func(qid)) for i, j in batch]
             inputs = self.tokenizer(prompts, return_tensors='pt', padding=True, truncation=True, max_length=self.max_len, return_special_tokens_mask=True)
             inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
             outputs = self.model.generate(**inputs, do_sample=False, temperature=0.0, top_p=None, return_dict_in_generate=True, output_scores=True, max_new_tokens=1).scores[0]
