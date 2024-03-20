@@ -31,7 +31,7 @@ class PRP(pt.transformer):
                  n_pass : int = 3):
         
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = AutoModelForCausalLM.from_pretrained(model_name_or_path).to(device)
+        self.model = AutoModelForCausalLM.from_pretrained(model_name_or_path, device_map="auto").to(device)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
 
         self.max_len = self.tokenizer.model_max_length
