@@ -40,6 +40,7 @@ class PRP(pt.transformer):
         self.few_shot_func = self._random if few_shot_mode == 'random' else self._topk
         self.few_shot_examples = few_shot_examples
         self.k = k
+        self.n = n
         self.window_size = window_size
         self.n_pass = n_pass
 
