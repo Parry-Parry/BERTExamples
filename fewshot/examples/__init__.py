@@ -13,16 +13,18 @@ class ExampleStore(object):
         if file is not None: 
             lookup = json.load(open(file, 'r'))
             frame = []
-            for qid, group in lookup.items():
-                for item in group:
-                    frame.append((
-                        {   
-                            'query_id' : qid,
-                            'rel_query_id' : item['rel_query_id'],
-                            'rel_doc_id_a' : item['rel_doc_id_a'],
-                            'rel_doc_id_b' : item['rel_doc_id_b']
-                        })
-                    )
+            for query in lookup:
+                query_id = query['trecdl.query.id']
+                for item in query['fewshots']:
+                    rel_query_id = item['msmarco.query.id']
+                    rel_doc_id_a = item['msmarco.qrel.info']['reldoc.id']
+                    rel_doc_id_b = item['msmarco.qrel.info']['reldoc.id']
+                    frame.append({
+                        'query_id' : query_id,
+                        'rel_query_id' : rel_query_id,
+                        'rel_doc_id_a' : rel_doc_id_a,
+                        'rel_doc_id_b' : rel_doc_id_b
+                    })
             lookup = pd.DataFrame.from_records(frame)
             lookup['rel_query'] = lookup['rel_query_id'].apply(lambda x : queries[x])
             lookup['pos_doc'] = lookup['rel_doc_id_a'].apply(lambda x : docs[x])
