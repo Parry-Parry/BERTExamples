@@ -1,3 +1,4 @@
+from collections import defaultdict
 import pyterrier as pt
 if not pt.started():
     pt.init()
@@ -89,9 +90,9 @@ class PRP(pt.transformer):
         scores = np.sum(score_matrix, axis=1).tolist()
 
         # convert to dict lookup based on score matrix correlating with row idx
-        log = {}
+        log = defaultdict(dict)
         for i in range(len(doc_texts)):
-            log[doc_ids[i]] = {doc_ids[j] : item for j, item in enumerate(score_matrix[i].tolist())}
+            log[qid][doc_ids[i]] = {doc_ids[j] : item for j, item in enumerate(score_matrix[i].tolist())}
             
         return scores, log
 
@@ -105,6 +106,8 @@ class PRP(pt.transformer):
         n = len(doc_texts)
         w = self.window_size
 
+        log = defaultdict(dict)
+
         for i in range(n):
             ranks.append(i+1)
             if i < num_pass:
@@ -115,25 +118,33 @@ class PRP(pt.transformer):
                             break
                         doc_one = doc_texts[n-j-w+k]
                         doc_two = doc_texts[n-j-w]
+                        docid_one = doc_ids[n-j-w+k]
+                        docid_two = doc_ids[n-j-w]
     
                         # Generate prompts
                         prompts = [create_prompt(query, doc_one, doc_two, few_shot_examples), create_prompt(query, doc_two, doc_one, few_shot_examples)]
                         inputs = self.tokenizer(prompts, return_tensors='pt', padding=True, truncation=True, max_length=self.max_len, return_special_tokens_mask=True)
                         inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
                         outputs = self.model.generate(**inputs, do_sample=False, temperature=0.0, top_p=None, return_dict_in_generate=True, output_scores=True, max_new_tokens=1).scores
-                        a_scores = outputs[0][:, (self.A, self.B)].softmax(dim=-1)[:, 0].tolist()
-                        b_scores = outputs[1][:, (self.A, self.B)].softmax(dim=-1)[:, 0].tolist()
-           
-                        # Check if a swap is needed and perform if so
-                        if a_scores[0] > b_scores[0] and b_scores[1] > b_scores[0]:
+                        scores = outputs[0][:, (self.A, self.B)].softmax(dim=-1)
+
+                        if scores[0, 0] > scores[0, 1] and scores[1, 1] > scores[1, 0]:
+                            log[qid][docid_one][docid_two] = 1.
+                            log[qid][docid_two][docid_one] = 0.
                             doc_texts[n-j-w+k], doc_texts[n-j-w] = doc_texts[n-j-w], doc_texts[n-j-w+k]
                             doc_ids[n-j-w+k], doc_ids[n-j-w] = doc_ids[n-j-w], doc_ids[n-j-w+k]
                             swapped = True
+                        elif scores[0, 0] < scores[0, 1] and scores[1, 1] < scores[1, 0]:
+                            log[qid][docid_one][docid_two] = 0.
+                            log[qid][docid_two][docid_one] = 1.
+                        else:
+                            log[qid][docid_one][docid_two] = 0.5
+                            log[qid][docid_two][docid_one] = 0.5
 
         # assign scores based on current position
         scores = [1.0/rank for rank in ranks]
 
-        return scores, None
+        return scores, log
 
     def transform(self, topics_or_res : pd.DataFrame, few_shot_examples : Optional[list] = None):
         res = {
@@ -154,8 +165,8 @@ class PRP(pt.transformer):
                 res['docno'].extend(query_results['docno'].tolist())
                 res['text'].extend(query_results['text'].tolist())
                 res['score'].extend(scores)
-                if log is not None:
-                    prediction_logs[qid] = log
+
+                prediction_logs.update(log)
         res = pd.DataFrame(res)
         # sort by qid and scores 
         res = res.sort_values(['qid', 'score'], ascending=[True, False])

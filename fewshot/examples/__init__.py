@@ -1,6 +1,7 @@
 from typing import Any, Optional
 import ir_datasets as irds
 import pandas as pd
+import json
 
 class ExampleStore(object):
     def __init__(self, ir_dataset : str, file : Optional[str] = None):
@@ -10,7 +11,10 @@ class ExampleStore(object):
         queries = pd.DataFrame(ds.queries_iter()).set_index("query_id").text.to_dict()
 
         if file is not None: 
-            lookup = pd.read_json(file, orient="records", lines=True)
+            lookup = json.load(open(file, 'r'))
+
+            
+
             lookup['rel_query'] = lookup['rel_query_id'].apply(lambda x : queries[x])
             lookup['pos_doc'] = lookup['doc_id_a'].apply(lambda x : docs[x])
             lookup['neg_doc'] = lookup['doc_id_b'].apply(lambda x : docs[x])
