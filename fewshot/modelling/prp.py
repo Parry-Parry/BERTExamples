@@ -123,6 +123,7 @@ class PRP(pt.transformer):
 
         log = defaultdict(dict)
         for i in range(len(doc_texts)):
+            if i > self.n_pass: break
             idx = len(doc_texts) - i
             for j in range(idx, 1, -1): # do pairwise swaps from idx to the start
                 doc_one = doc_texts[j]
