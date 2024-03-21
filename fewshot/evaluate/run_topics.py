@@ -18,6 +18,7 @@ def run(topics_or_res : str,
          batch_size : int = 4,
          window_size : int = None,
          few_shot_mode : str = 'random',
+         score_func : str = 'allpair',
          k : int = 0,
          n_pass : int = 3,
          k_shot_file : str = None,
@@ -58,6 +59,7 @@ def run(topics_or_res : str,
                      window_size=window_size, 
                      n_pass=n_pass, 
                      few_shot_mode=few_shot_mode, 
+                     score_func=score_func,
                      few_shot_examples=few_shot_examples)
     except OSError as e: return f"Failed to load {model_base}, {e}"
 

@@ -25,10 +25,12 @@ def add_negatives(examples_path : str, out_path : str = None, lookup="msmarco-pa
         }
         for rel_query_id, rel_doc_id_a in query['examples']:
             res = index.search(queries[rel_query_id])
-            # filter to ranks 10-100
-            res = res[res["rank"] >= 10]
-            # sample a negative 
-            neg = res.sample(1, seed=SEED)
+            # filter to ranks 50-100
+            negs = res[res["rank"] >= 50]
+            if len(negs) == 0:
+                neg = res.sample(1, seed=SEED)
+            else:
+                neg = negs.sample(1, seed=SEED)
             record['examples'].append({
                 'rel_query_id' : rel_query_id,
                 'rel_doc_id_a' : rel_doc_id_a,
