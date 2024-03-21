@@ -91,35 +91,35 @@ class PRP(pt.transformer):
         return np.argsort(scores), log
     
     def _all_pair(self, qid : str, query : str, query_results : pd.DataFrame):
-        doc_texts = query_results['text'].to_list()
-        doc_ids = query_results['docid'].to_list()
+        doc_texts = query_results['text'].to_numpy()
+        doc_ids = query_results['docid'].to_numpy()
         
-        order, log = self._score_set(qid, query, doc_ids, doc_texts)
+        order, log = self._score_set(qid, query, doc_ids.tolist(), doc_texts.tolist())
         scores = [1.0/(i+1) for i in range(len(order))]
-        doc_texts = [doc_texts[i] for i in order]
-        doc_ids = [doc_ids[i] for i in order]
+        doc_texts = doc_texts[order]
+        doc_ids = doc_ids[order]
 
         return doc_ids, doc_texts, scores, log
 
     def _sliding_window(self, qid : str, query : str, query_results : pd.DataFrame):
-        doc_texts = query_results['text'].to_list()
-        doc_ids = query_results['docid'].to_list()
+        doc_texts = query_results['text'].to_numpy()
+        doc_ids = query_results['docid'].to_numpy()
 
         window_size = self.window_size
         stride = window_size / 2
         log = {}
         for start_idx, end_idx, window_len in _iter_windows(len(doc_texts), window_size, stride):
-            order, _log = self._score_set(qid, query, doc_ids[start_idx:end_idx], doc_texts[start_idx:end_idx])
-            doc_texts[start_idx:end_idx] = [doc_texts[i] for i in order]
-            doc_ids[start_idx:end_idx] = [doc_ids[i] for i in order]
+            order, _log = self._score_set(qid, query, doc_ids[start_idx:end_idx].tolist(), doc_texts[start_idx:end_idx].tolist())
+            doc_texts[start_idx:end_idx] = doc_texts[order]
+            doc_ids[start_idx:end_idx] = doc_ids[order]
             log.update(_log)
 
         scores = [1.0/(i+1) for i in range(len(doc_texts))]
         return doc_ids, doc_texts, scores, log
     
     def _partial_bubble_sort(self, qid : str, query : str, query_results : pd.DataFrame):
-        doc_texts = query_results['text'].to_list()
-        doc_ids = query_results['docid'].to_list()
+        doc_texts = query_results['text'].to_numpy()
+        doc_ids = query_results['docid'].to_numpy()
 
         log = defaultdict(dict)
         for i in range(len(doc_texts)):
