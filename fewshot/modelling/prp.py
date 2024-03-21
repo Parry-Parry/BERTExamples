@@ -148,7 +148,6 @@ class PRP(pt.transformer):
                     log[qid][doc_ids[j-1]][doc_ids[j]] = 0.5
         
         scores = [1.0/(i+1) for i in range(len(doc_texts))]
-
         return doc_ids, doc_texts, scores, log
 
     def transform(self, topics_or_res : pd.DataFrame, few_shot_examples : Optional[list] = None):
@@ -172,7 +171,6 @@ class PRP(pt.transformer):
                 res['score'].extend(scores)
 
                 log.update(_log)
+
         res = pd.DataFrame(res)
-        # sort by qid and scores 
-        res = res.sort_values(['qid', 'score'], ascending=[True, False])
         return add_ranks(res), log
