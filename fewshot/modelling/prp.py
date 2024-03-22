@@ -37,6 +37,8 @@ class PRP(pt.Transformer):
 
         self.model = AutoModelForCausalLM.from_pretrained(model_name_or_path, device_map="auto")
         self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
+        self.tokenizer.pad_token = self.tokenizer.eos_token
+        self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
 
         self.max_len = 4096
         self.batch_size = batch_size
