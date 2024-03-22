@@ -18,8 +18,8 @@ class ExampleStore(object):
                 for item in query['fewshots']:
                     print(item)
                     rel_query_id = item['msmarco.query.id']
-                    rel_doc_id_a = item['msmarco.qrel.info']['reldoc.id']
-                    rel_doc_id_b = item['msmarco.qrel.info']['reldoc.id']
+                    rel_doc_id_a = item['msmarco.qrel.info'][0]['reldoc.id']
+                    rel_doc_id_b = item['msmarco.qrel.info'][0]['reldoc.id']
                     frame.append({
                         'query_id' : query_id,
                         'rel_query_id' : rel_query_id,
