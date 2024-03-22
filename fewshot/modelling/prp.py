@@ -74,7 +74,7 @@ class PRP(pt.Transformer):
             prompts = [create_prompt(query, doc_texts[i], doc_texts[j], self.few_shot_func(qid)) for i, j in batch]
             inputs = self.tokenizer(prompts, return_tensors='pt', padding=True, truncation=True, max_length=self.max_len)
             inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
-            outputs = self.model.generate(**inputs, do_sample=False, return_dict_in_generate=True, output_scores=True, max_new_tokens=1).scores[0]
+            outputs = self.model.generate(**inputs, do_sample=False, return_dict_in_generate=True, output_scores=True, max_new_tokens=1, pad_token_id=self.tokenizer.eos_token_id).scores[0]
             scores = outputs[:, (self.A, self.B)].softmax(dim=-1)[:, 0].tolist()
             for (i, j), score in zip(batch, scores):
                 score_matrix[i, j] = score
