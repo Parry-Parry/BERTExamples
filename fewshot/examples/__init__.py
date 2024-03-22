@@ -15,9 +15,7 @@ class ExampleStore(object):
             frame = []
             for query in lookup:
                 query_id = query['trecdl.query.id']
-                print(query)
                 for item in query['fewshots']:
-                    print(item)
                     rel_query_id = item['msmarco.query.id']
                     rel_doc_id_a = item['msmarco.qrel.info'][0]['reldoc.id']
                     rel_doc_id_b = item['msmarco.qrel.info'][0]['reldoc.id']
