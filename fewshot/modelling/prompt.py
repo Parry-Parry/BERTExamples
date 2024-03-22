@@ -14,6 +14,11 @@ Query: {related_query}
 Passage 1 : {rel_doc}
 Passage 2 : {nrel_doc}
 Output: 1
+
+Query: {related_query}
+Passage 1 : {nrel_doc}
+Passage 2 : {rel_doc}
+Output: 0
             
 ####
 """
