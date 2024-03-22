@@ -1,4 +1,5 @@
 from tqdm import tqdm
+
 def _iter_windows(n, window_size, stride):
     # TODO: validate window_size and stride
     for start_idx in tqdm(range((n // stride) * stride, -1, -stride), unit='window'):

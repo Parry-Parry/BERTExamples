@@ -13,7 +13,6 @@ import torch
 import json
 
 def run(topics_or_res : str, 
-         run_dir : str, 
          out_dir : str, 
          model_name_or_path : str,
          batch_size : int = 4,
@@ -21,7 +20,7 @@ def run(topics_or_res : str,
          few_shot_mode : str = 'random',
          score_func : str = 'allpair',
          k : int = 0,
-         n_pass : int = 3,
+         n_pass : int = 10,
          k_shot_file : str = None,
          eval : str = 'msmarco-passage/trec-dl-2019/judged',
          dataset : str = 'irds:msmarco-passage/train/triples-small',
@@ -45,10 +44,13 @@ def run(topics_or_res : str,
 
     os.makedirs(out_dir, exist_ok=True)
 
-    model_base = os.path.basename(run_dir)
-    out = join(out_dir, f"{model_base}_run.gz")
+    if k_shot_file:
+        sim = "bert" if "bert" in k_shot_file else "bm25"
 
-    if os.path.exists(out): return "Already exists"
+    eval_set = "19" if "2019" in eval else "20"
+    out = join(out_dir, f"{eval_set}.{k}.{few_shot_mode}.{score_func}.{sim}.{seed}")
+
+    if os.path.exists(f"{out}.res.gz"): return "Already exists"
 
     if k > 1: few_shot_examples = ExampleStore(lookup.replace('irds:', ''), file=k_shot_file)
     else: few_shot_examples = None
@@ -62,12 +64,12 @@ def run(topics_or_res : str,
                      few_shot_mode=few_shot_mode, 
                      score_func=score_func,
                      few_shot_examples=few_shot_examples)
-    except OSError as e: return f"Failed to load {model_base}, {e}"
+    except OSError as e: return f"Failed to load model, {e}"
 
     res, log = model.transform(topics_or_res)
-    with open(join(out_dir, f"{model_base}_log.json"), 'w') as f:
+    with open(join(out_dir, f"{out}.log.json"), 'w') as f:
         json.dump(log, f)
-    pt.io.write_results(res, out)
+    pt.io.write_results(res, f"{out}.res.gz")
 
 
     return "Success!"
