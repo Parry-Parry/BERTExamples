@@ -9,7 +9,7 @@ setup(
         'ir-measures',
         'ir_datasets',
         'pandas',
-        'pyterrier',
+        'python-terrier',
         'transformers',
         'torch',
         'tqdm',
