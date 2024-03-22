@@ -18,7 +18,7 @@ class ExampleStore(object):
                 for item in query['fewshots']:
                     rel_query = item['msmarco.query.id']
                     rel_doc_a = item['msmarco.qrel.info'][0]['reldoc.text']
-                    rel_doc_b = item['msmarco.qrel.info'][0]['reldoc.text']
+                    rel_doc_b = item['msmarco.qrel.info'][0]['nreldoc.text']
                     frame.append({
                         'query_id' : query_id,
                         'rel_query' : rel_query,
