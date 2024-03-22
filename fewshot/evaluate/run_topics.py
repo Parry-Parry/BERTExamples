@@ -10,6 +10,7 @@ from ..examples import ExampleStore
 import random
 import numpy as np
 import torch
+import json
 
 def run(topics_or_res : str, 
          run_dir : str, 
@@ -63,8 +64,11 @@ def run(topics_or_res : str,
                      few_shot_examples=few_shot_examples)
     except OSError as e: return f"Failed to load {model_base}, {e}"
 
-    res = model.transform(topics_or_res)
+    res, log = model.transform(topics_or_res)
+    with open(join(out_dir, f"{model_base}_log.json"), 'w') as f:
+        json.dump(log, f)
     pt.io.write_results(res, out)
+
 
     return "Success!"
 
