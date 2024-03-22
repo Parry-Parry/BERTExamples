@@ -27,6 +27,8 @@ def run(topics_or_res : str,
          seed : int = 42,
          ):  
     
+    print(k)
+    print(k_shot_file)
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -53,7 +55,6 @@ def run(topics_or_res : str,
     if os.path.exists(f"{out}.res.gz"): return "Already exists"
 
     if k > 1: 
-        print("test")
         few_shot_examples = ExampleStore(eval.replace('irds:', ''), file=k_shot_file)
     else: few_shot_examples = None
 
