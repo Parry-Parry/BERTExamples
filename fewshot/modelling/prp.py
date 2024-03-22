@@ -70,7 +70,6 @@ class PRP(pt.Transformer):
 
         for batch in tqdm(chunked(idx, self.batch_size), unit='batch'):
             prompts = [create_prompt(query, doc_texts[i], doc_texts[j], self.few_shot_func(qid)) for i, j in batch]
-            print(prompts[0])
             inputs = self.tokenizer(prompts, return_tensors='pt', padding=True, truncation=True, max_length=self.max_len)
             inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
             outputs = self.model.generate(**inputs, do_sample=False, return_dict_in_generate=True, output_scores=True, max_new_tokens=1).scores[0]
