@@ -52,7 +52,9 @@ def run(topics_or_res : str,
 
     if os.path.exists(f"{out}.res.gz"): return "Already exists"
 
-    if k > 1: few_shot_examples = ExampleStore(eval.replace('irds:', ''), file=k_shot_file)
+    if k > 1: 
+        print("test")
+        few_shot_examples = ExampleStore(eval.replace('irds:', ''), file=k_shot_file)
     else: few_shot_examples = None
 
     try: 
