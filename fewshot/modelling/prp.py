@@ -93,7 +93,7 @@ class PRP(pt.Transformer):
     
     def _all_pair(self, qid : str, query : str, query_results : pd.DataFrame):
         doc_texts = query_results['text'].to_numpy()
-        doc_ids = query_results['docid'].to_numpy()
+        doc_ids = query_results['docno'].to_numpy()
         
         order, log = self._score_set(qid, query, doc_ids.tolist(), doc_texts.tolist())
         scores = [1.0/(i+1) for i in range(len(order))]
@@ -104,7 +104,7 @@ class PRP(pt.Transformer):
 
     def _sliding_window(self, qid : str, query : str, query_results : pd.DataFrame):
         doc_texts = query_results['text'].to_numpy()
-        doc_ids = query_results['docid'].to_numpy()
+        doc_ids = query_results['docno'].to_numpy()
 
         window_size = self.window_size
         stride = window_size / 2
@@ -120,7 +120,7 @@ class PRP(pt.Transformer):
     
     def _partial_bubble_sort(self, qid : str, query : str, query_results : pd.DataFrame):
         doc_texts = query_results['text'].to_numpy()
-        doc_ids = query_results['docid'].to_numpy()
+        doc_ids = query_results['docno'].to_numpy()
 
         log = defaultdict(dict)
         for i in range(len(doc_texts)):
