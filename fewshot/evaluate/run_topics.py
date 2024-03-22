@@ -27,8 +27,6 @@ def run(topics_or_res : str,
          seed : int = 42,
          ):  
     
-    print(k)
-    print(k_shot_file)
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
