@@ -33,7 +33,7 @@ class PRP(pt.transformer):
                  n : int = 10,
                  window_size : int = None,
                  n_pass : int = 3,
-                 return_log : bool = False):
+                 return_log : bool = True):
         
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = AutoModelForCausalLM.from_pretrained(model_name_or_path, device_map="auto").to(device)
