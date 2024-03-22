@@ -16,19 +16,16 @@ class ExampleStore(object):
             for query in lookup:
                 query_id = query['trecdl.query.id']
                 for item in query['fewshots']:
-                    rel_query_id = item['msmarco.query.id']
-                    rel_doc_id_a = item['msmarco.qrel.info'][0]['reldoc.id']
-                    rel_doc_id_b = item['msmarco.qrel.info'][0]['reldoc.id']
+                    rel_query = item['msmarco.query.id']
+                    rel_doc_a = item['msmarco.qrel.info'][0]['reldoc.text']
+                    rel_doc_b = item['msmarco.qrel.info'][0]['reldoc.text']
                     frame.append({
                         'query_id' : query_id,
-                        'rel_query_id' : rel_query_id,
-                        'rel_doc_id_a' : rel_doc_id_a,
-                        'rel_doc_id_b' : rel_doc_id_b
+                        'rel_query' : rel_query,
+                        'pos_doc' : rel_doc_a,
+                        'neg_doc' : rel_doc_b
                     })
             lookup = pd.DataFrame.from_records(frame)
-            lookup['rel_query'] = lookup['rel_query_id'].apply(lambda x : queries[x])
-            lookup['pos_doc'] = lookup['rel_doc_id_a'].apply(lambda x : docs[x])
-            lookup['neg_doc'] = lookup['rel_doc_id_b'].apply(lambda x : docs[x])
             self.lookup = lookup
             self.lookup_func = self._local
         else:
