@@ -22,7 +22,7 @@ def create_pairs(num : int):
             array.append((i, j))
     return array
                 
-class PRP(pt.transformer):
+class PRP(pt.Transformer):
     def __init__(self, 
                  model_name_or_path : str, 
                  batch_size : int = 4,
