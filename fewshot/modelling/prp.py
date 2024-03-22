@@ -151,7 +151,7 @@ class PRP(pt.Transformer):
         scores = [1.0/(i+1) for i in range(len(doc_texts))]
         return doc_ids, doc_texts, scores, log
 
-    def transform(self, topics_or_res : pd.DataFrame, few_shot_examples : Optional[list] = None):
+    def transform(self, topics_or_res : pd.DataFrame):
         res = {
             'qid': [],
             'query': [],
@@ -164,7 +164,7 @@ class PRP(pt.Transformer):
         with torch.no_grad():
             for (qid, query), query_results in tqdm(topics_or_res.groupby(['qid', 'query']), unit='q'):
                 # for _all-pair processing:
-                doc_ids, doc_texts, scores, _log = self.score_func(qid, query, query_results, few_shot_examples)
+                doc_ids, doc_texts, scores, _log = self.score_func(qid, query, query_results)
                 res['qid'].extend([qid] * len(query_results))
                 res['query'].extend([query] * len(query_results))
                 res['docno'].extend(doc_ids)
