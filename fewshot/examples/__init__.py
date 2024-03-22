@@ -43,11 +43,11 @@ class ExampleStore(object):
             self.lookup_func = self._random
 
     def _random(self, n : int, qid : Optional[str] = None):
-        return [(row.rel_query_id, row.pos_doc, row.neg_doc) for row in self.lookup.sample(n).itertuples()]
+        return [(row.rel_query, row.pos_doc, row.neg_doc) for row in self.lookup.sample(n).itertuples()]
 
     def _local(self, n : int, qid : str):
         _subset = self.lookup[self.lookup['query_id'] == qid].iloc[:n]
-        return [(row.query, row.pos_doc, row.neg_doc) for row in _subset.itertuples()]
+        return [(row.rel_query, row.pos_doc, row.neg_doc) for row in _subset.itertuples()]
     
     def __call__(self, n : int, qid : Optional[str] = None) -> Any:
         return self.lookup_func(n, qid)
