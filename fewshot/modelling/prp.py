@@ -32,7 +32,8 @@ class PRP(pt.transformer):
                  k : int = 1,
                  n : int = 10,
                  window_size : int = None,
-                 n_pass : int = 3):
+                 n_pass : int = 3,
+                 return_log : bool = False):
         
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = AutoModelForCausalLM.from_pretrained(model_name_or_path, device_map="auto").to(device)
@@ -51,6 +52,7 @@ class PRP(pt.transformer):
         self.n = n
         self.window_size = window_size
         self.n_pass = n_pass
+        self.return_log = return_log
 
         self.A = self.tokenizer.encode("1", return_tensors="pt", add_special_tokens=False)[0][1] # remove or add [1] based on different tokens
         self.B = self.tokenizer.encode("2", return_tensors="pt", add_special_tokens=False)[0][1] # remove or add [1] based on different tokens
@@ -173,4 +175,5 @@ class PRP(pt.transformer):
                 log.update(_log)
 
         res = pd.DataFrame(res)
-        return add_ranks(res), log
+        if self.return_log: return add_ranks(res), log
+        else: return add_ranks(res)
