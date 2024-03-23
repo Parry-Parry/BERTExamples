@@ -34,8 +34,8 @@ class PRP(pt.Transformer):
                  window_size : int = None,
                  n_pass : int = 3,
                  return_log : bool = True):
-
-        self.model = AutoModelForCausalLM.from_pretrained(model_name_or_path, device_map="auto")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model = AutoModelForCausalLM.from_pretrained(model_name_or_path).to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
         self.tokenizer.pad_token = self.tokenizer.eos_token
         self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
