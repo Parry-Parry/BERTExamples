@@ -12,9 +12,9 @@ import numpy as np
 import torch
 import json
 
-def run(topics_or_res : str, 
-         out_dir : str, 
+def run(out_dir : str, 
          model_name_or_path : str,
+         topics_or_res : str = None, 
          batch_size : int = 4,
          window_size : int = None,
          few_shot_mode : str = 'random',
@@ -37,7 +37,7 @@ def run(topics_or_res : str,
     lookup = irds.load(eval)
     queries = pd.DataFrame(lookup.queries_iter()).set_index('query_id').text.to_dict()
     dataset = pt.get_dataset(dataset)
-    topics_or_res = pt.io.read_results(topics_or_res)
+    topics_or_res = pt.io.read_results(topics_or_res) if topics_or_res else pd.DataFrame(lookup.queries_iter()).rename(columns={'query_id' : 'qid'}).drop(columns=['text'])
     topics_or_res['query'] = topics_or_res['qid'].apply(lambda x: queries[str(x)])
     topics_or_res = pt.text.get_text(dataset, "text")(topics_or_res)
     del queries
